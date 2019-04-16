@@ -41,6 +41,16 @@ export default class Canvas extends EventBus{
         const layer = new Layer(this);
         this.layout = layer;
         this.layers = [layer];
+
+        this._initEvents();
+    }
+
+    _initEvents() {
+        this.canvas.addEventListener('click', this._eventHandle, false);
+    }
+
+    _eventHandle = (e) => {
+        this.emit(e.type, e);
     }
 
     addShape(type, options) {
