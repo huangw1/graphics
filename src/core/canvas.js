@@ -1,9 +1,16 @@
-export default class Canvas {
+import _ from 'lodash';
+import Layer from './layer';
+import EventBus from "./eventbus";
+
+export default class Canvas extends EventBus{
     constructor(ele, options = {}) {
+        super();
         if (!ele) {
             ele = document.body;
         }
+        this._options = _.assign({width: 300, height: 300}, options);
         this._getCanvas(ele);
+        this._init(this._options)
     }
 
     _getCanvas(container) {
@@ -23,6 +30,35 @@ export default class Canvas {
         }
         this.canvas = canvas;
         this.container = container;
+    }
+
+    _init(options) {
+        const {width, height} = options;
+        this.canvas.width = width;
+        this.canvas.height = height;
+        this.context = this.canvas.getContext('2d');
+
+        const layer = new Layer(this);
+        this.layout = layer;
+        this.layers = [layer];
+    }
+
+    addShape(type, options) {
+        this.layout.addShape(type, options);
+    }
+
+    getContext() {
+        return this.context;
+    }
+
+    _getCanvasInstance() {
+        return this;
+    }
+
+    draw() {
+        this.layers.forEach(layer => {
+            layer.draw(this.context);
+        })
     }
 }
 
