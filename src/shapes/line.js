@@ -3,15 +3,28 @@
  * @Date: 2019/4/16 12:58
  */
 import _ from 'lodash';
+import inside from './util/inside';
 
 export default class Line {
+    static ATTRS = {
+        x1       : 0,
+        y1       : 0,
+        x2       : 0,
+        y2       : 10,
+        lineWidth: 1
+    }
+
     constructor(options = {}) {
-        this._attrs = _.assign({}, options);
+        this.attrs = _.assign({}, Line.ATTRS, options);
+    }
+
+    includes(x, y) {
+        const {x1, y1, x2, y2, lineWidth} = this.attrs;
+        return inside.line(x1, y1, x2, y2, lineWidth, x, y);
     }
 
     draw(ctx) {
-        const { x1, y1, x2, y2, ...otherAttrs } = this._attrs;
-        Object.keys(otherAttrs).forEach(key => ctx[key] = otherAttrs[key]);
+        const {x1, y1, x2, y2} = this.attrs;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);

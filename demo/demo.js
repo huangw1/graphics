@@ -5,7 +5,7 @@ const canvas = new Canvas('#container', {
     height: 600
 });
 
-canvas.addShape('line', {
+const line1 = canvas.addShape('line', {
     attrs: {
         x1: 0,
         y1: 0,
@@ -14,6 +14,10 @@ canvas.addShape('line', {
         lineWidth: 3,
         strokeStyle: 'blank'
     }
+});
+
+line1.on('click', () => {
+    console.log('line1')
 });
 
 canvas.addShape('line', {

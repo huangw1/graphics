@@ -9,6 +9,10 @@ export default class EventBus {
         this.events = {};
     }
 
+    elementsWithContext(type) {
+        return (this.events[type] || []).filter(item => item.context).map(item => item.context);
+    }
+
     on(type, fun, context) {
         const event = {type, fun, context};
         if (type in this.events) {
@@ -34,9 +38,10 @@ export default class EventBus {
 
     emit(type, context, ...data) {
         if (type in this.events) {
-            const isElement = context instanceof Element;
-            if(isElement) {
-                this.events[type].filter(item => item.context === context).forEach(event => {
+            const isElement = context instanceof Element || (Array.isArray(context) && context.every(ctx => ctx instanceof Element));
+            if (isElement) {
+                context = Array.isArray(context) ? context : [context];
+                this.events[type].filter(item => context.indexOf(item.context) !== -1).forEach(event => {
                     event.fun(...data)
                 })
             } else {

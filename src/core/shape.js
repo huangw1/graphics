@@ -5,27 +5,43 @@
 import _ from 'lodash';
 import * as shapes from '../shapes';
 import Element from "./element";
+import {clamp} from "../utils/common";
 
 export default class Shape extends Element {
-    constructor(type, options, container) {
-        super(container);
+    static ATTRS = {
+        hasFill  : true,
+        hasStroke: false,
+        opacity  : 1
+    }
+
+    constructor(type, options = {}, container) {
+        super(container, 'Shape', options.attrs);
         this._init(type, options);
     }
 
     _init(type, options) {
         const {attrs, ...otherControl} = options;
-        const defaultControl = {hasFill: true, hasStroke: false};
-        if(type === 'Line') {
-            _.assign(defaultControl, {hasFill: false, hasStroke: true});
+        if (type === 'Line') {
+            _.assign(otherControl, {hasFill: false, hasStroke: true});
         }
-        this.attrs = _.assign(defaultControl, otherControl);
+        this.type = type;
+        this.attrs = _.assign({}, Shape.ATTRS, otherControl);
         this.shape = new shapes[type](attrs);
+    }
+
+    includes(x, y) {
+        return this.shape.includes(x, y);
     }
 
     draw(ctx) {
         const context = ctx || this.getContext();
-        const {hasFill, hasStroke} = this.attrs;
+        const {hasFill, hasStroke, opacity} = this.attrs;
+        const ga = context.globalAlpha;
         context.save();
+        context.globalAlpha = clamp(opacity * ga, 0, 1);
+        Object.keys(this.canvasAttrs).forEach(attr => {
+            context[attr] = this.canvasAttrs[attr];
+        });
         this.shape.draw(context);
         if (hasStroke) {
             context.stroke();

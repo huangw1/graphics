@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Layer from './layer';
 import EventBus from "./eventbus";
 
-export default class Canvas extends EventBus{
+export default class Canvas extends EventBus {
     constructor(ele, options = {}) {
         super();
         if (!ele) {
@@ -50,15 +50,41 @@ export default class Canvas extends EventBus{
     }
 
     _eventHandle = (e) => {
-        this.emit(e.type, e);
+        const eventType = e.type;
+        const {x, y} = this.getPointInCanvas(e.clientX, e.clientY);
+        const elements = this.elementsWithContext(eventType);
+        const targetElements = elements.filter(element => element.includes(x, y));
+        this.emit(eventType, targetElements, e)
+    }
+
+    getPointInCanvas(clientX, clientY) {
+        // ratio = style size(css) / real size(responsive)
+        const canvas = this.canvas;
+        const canvasBox = canvas.getBoundingClientRect();
+        const width = canvasBox.right - canvasBox.left;
+        const height = canvasBox.bottom - canvasBox.top;
+        return {
+            x: (clientX - canvasBox.left) * (canvas.width / width),
+            y: (clientY - canvasBox.top) * (canvas.height / height)
+        };
+    }
+
+    addLayer(options) {
+        const layer = new Layer(this, options);
+        this.layers.push(layer);
+        return layer;
     }
 
     addShape(type, options) {
-        this.layout.addShape(type, options);
+        return this.layout.addShape(type, options);
     }
 
     getContext() {
         return this.context;
+    }
+
+    getCanvas() {
+        return this.canvas;
     }
 
     _getCanvasInstance() {
