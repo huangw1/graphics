@@ -42,7 +42,7 @@ export default class Element {
             });
         }
         this.canvasAttrs = _.assign({}, Element.ATTRS, canvasAttrs);
-        this.zInde = options.zIndex || 0;
+        this.zIndex = options.zIndex || 0;
     }
 
     getContext() {

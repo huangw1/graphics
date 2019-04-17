@@ -11,13 +11,16 @@ export default {
             return false;
         }
         const distance = line.pointDistance(x1, y1, x2, y2, x, y);
-        if(isNaN(distance)) {
+        if (isNaN(distance)) {
             return false;
         }
         return distance - lineWidth / 2 <= 0;
     },
     rect(x, y, width, height, clientX, clientY) {
         return clientX >= x && clientX <= x + width && clientY >= y && clientY <= y + height;
+    },
+    circle(x, y, r, clientX, clientY) {
+        return Math.pow(clientX - x, 2) + Math.pow(clientY - y, 2) - Math.pow(r, 2) <= 0;
     },
     inBoundary(minX, maxX, minY, maxY, x, y) {
         return x >= minX && x <= maxX && y >= minY && y <= maxY;

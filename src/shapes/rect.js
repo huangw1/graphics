@@ -36,7 +36,7 @@ export default class Rect {
             ctx.lineTo(x, y + h);
             ctx.lineTo(x + w, y + h);
             ctx.lineTo(x + w, y);
-            ctx.closePath();
         }
+        ctx.closePath();
     }
 }

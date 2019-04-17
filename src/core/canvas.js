@@ -71,7 +71,7 @@ export default class Canvas extends EventBus {
 
     addLayer(options) {
         const layer = new Layer(this, options);
-        const index = _.findLastIndex(this.layers, shape => shape.zIndex <= layer.zInde);
+        const index = _.findLastIndex(this.layers, shape => shape.zIndex <= layer.zIndex);
         if (index === -1) {
             this.layers.unshift(layer)
         } else {
