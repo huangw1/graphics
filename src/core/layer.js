@@ -27,11 +27,11 @@ export default class Layer extends Element {
         this.computed = _.assign(this.computed, {offsetX, offsetY});
     }
 
-    includes(x, y) {
+    includes(clientX, clientY) {
         const {offsetX, offsetY} = this.computed;
-        if (x >= offsetX && y >= offsetY) {
+        if (clientX >= offsetX && clientY >= offsetY) {
             if (this.shapes.length) {
-                return this.shapes.some(shape => shape.includes(x, y));
+                return this.shapes.some(shape => shape.includes(clientX, clientY));
             }
         }
         return false;

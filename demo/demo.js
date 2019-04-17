@@ -9,10 +9,19 @@ const line1 = canvas.addShape('line', {
     attrs: {
         x1: 100,
         y1: 100,
-        x2: 400,
+        x2: 500,
         y2: 100,
-        lineWidth: 3,
+        lineWidth: 5,
         strokeStyle: 'blank'
+    }
+});
+
+const rect1 = canvas.addShape('rect', {
+    attrs: {
+        x: 200,
+        y: 200,
+        w: 200,
+        h: 200,
     }
 });
 
@@ -33,6 +42,10 @@ const line2 = layer1.addShape('line', {
         lineWidth: 5,
         strokeStyle: 'red'
     }
+});
+
+rect1.on('click', () => {
+    console.log('rect1')
 });
 
 line1.on('click', () => {

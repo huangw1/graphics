@@ -16,6 +16,9 @@ export default {
         }
         return distance - lineWidth / 2 <= 0;
     },
+    rect(x, y, width, height, clientX, clientY) {
+        return clientX >= x && clientX <= x + width && clientY >= y && clientY <= y + height;
+    },
     inBoundary(minX, maxX, minY, maxY, x, y) {
         return x >= minX && x <= maxX && y >= minY && y <= maxY;
     }

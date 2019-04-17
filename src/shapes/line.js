@@ -18,9 +18,9 @@ export default class Line {
         this.attrs = _.assign({}, Line.ATTRS, options);
     }
 
-    includes(x, y) {
+    includes(clientX, clientY) {
         const {x1, y1, x2, y2, lineWidth} = this.attrs;
-        return inside.line(x1, y1, x2, y2, lineWidth, x, y);
+        return inside.line(x1, y1, x2, y2, lineWidth, clientX, clientY);
     }
 
     draw(ctx) {
