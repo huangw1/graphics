@@ -4,7 +4,7 @@ const resolve = path.resolve;
 module.exports = {
     output : {
         filename     : '[name].js',
-        library      : 'ZE',
+        library      : 'g',
         libraryTarget: 'umd',
         path         : resolve(__dirname, '../dist/')
     },

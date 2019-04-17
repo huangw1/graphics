@@ -16,7 +16,7 @@ export default class Layer extends Element {
 
     constructor(container, options = {}) {
         super(container, 'Layer', options.attrs);
-        this.attrs = _.assign({}, Layer.ATTRS, options);
+        this.attrs = _.assign({}, Layer.ATTRS, options.attrs);
         this.shapes = [];
         let offsetX = this.attrs.x;
         let offsetY = this.attrs.y;
@@ -28,8 +28,11 @@ export default class Layer extends Element {
     }
 
     includes(x, y) {
-        if (this.shapes.length) {
-            return this.shapes.some(shape => shape.includes(x, y));
+        const {offsetX, offsetY} = this.computed;
+        if (x >= offsetX && y >= offsetY) {
+            if (this.shapes.length) {
+                return this.shapes.some(shape => shape.includes(x, y));
+            }
         }
         return false;
     }

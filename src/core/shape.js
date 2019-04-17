@@ -30,7 +30,8 @@ export default class Shape extends Element {
     }
 
     includes(x, y) {
-        return this.shape.includes(x, y);
+        const {computed} = this.container;
+        return this.shape.includes(x - computed.offsetX, y - computed.offsetY);
     }
 
     draw(ctx) {

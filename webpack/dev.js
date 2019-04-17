@@ -6,7 +6,7 @@ const merge = require('webpack-merge');
 
 module.exports = merge({
     entry       : {
-        ze  : path.resolve(__dirname, '../src/index.js'),
+        g   : path.resolve(__dirname, '../src/index.js'),
         demo: path.resolve(__dirname, '../demo/demo.js')
     },
     devtool     : 'cheap-source-map',
