@@ -15,7 +15,7 @@ export default class Shape extends Element {
     }
 
     constructor(type, options = {}, container) {
-        super(container, 'Shape', options.attrs);
+        super(container, 'Shape', options);
         this._init(type, options);
     }
 
@@ -26,6 +26,9 @@ export default class Shape extends Element {
         }
         this.type = type;
         this.attrs = _.assign({}, Shape.ATTRS, otherControl);
+        if (!shapes[type]) {
+            throw `unknown shape ${type}!`
+        }
         this.shape = new shapes[type](attrs);
     }
 

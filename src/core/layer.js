@@ -15,7 +15,7 @@ export default class Layer extends Element {
     }
 
     constructor(container, options = {}) {
-        super(container, 'Layer', options.attrs);
+        super(container, 'Layer', options);
         this.attrs = _.assign({}, Layer.ATTRS, options.attrs);
         this.shapes = [];
         let offsetX = this.attrs.x;
@@ -37,16 +37,25 @@ export default class Layer extends Element {
         return false;
     }
 
+    _insertElement(element, zIndex) {
+        const index = _.findLastIndex(this.shapes, shape => shape.zIndex <= zIndex);
+        if (index === -1) {
+            this.shapes.unshift(element)
+        } else {
+            this.shapes.splice(index + 1, 0, element);
+        }
+    }
+
     addLayer(options) {
         const layer = new Layer(this, options);
-        this.shapes.push(layer);
+        this._insertElement(layer, layer.zIndex);
         return layer;
     }
 
     addShape(type, options) {
         const shapeType = _.upperFirst(type);
         const shape = new Shape(shapeType, options, this);
-        this.shapes.push(shape);
+        this._insertElement(shape, shape.zIndex);
         return shape;
     }
 
@@ -63,5 +72,6 @@ export default class Layer extends Element {
         this.shapes.forEach(shape => {
             shape.draw(context);
         });
+        context.restore();
     }
 }

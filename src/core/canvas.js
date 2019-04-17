@@ -71,7 +71,12 @@ export default class Canvas extends EventBus {
 
     addLayer(options) {
         const layer = new Layer(this, options);
-        this.layers.push(layer);
+        const index = _.findLastIndex(this.layers, shape => shape.zIndex <= layer.zInde);
+        if (index === -1) {
+            this.layers.unshift(layer)
+        } else {
+            this.layers.splice(index + 1, 0, layer);
+        }
         return layer;
     }
 

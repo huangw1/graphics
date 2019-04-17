@@ -2,6 +2,8 @@
  * @Author: huangw1
  * @Date: 2019/4/16 13:50
  */
+import _ from 'lodash';
+
 const CANVAS_ATTRS = [
     'fillStyle',
     'font',
@@ -22,17 +24,25 @@ const CANVAS_ATTRS = [
 ];
 
 export default class Element {
-    constructor(container, type, attrs = {}) {
+    static ATTRS = {
+        fillStyle  : 'black',
+        strokeStyle: 'black'
+    }
+
+    constructor(container, type, options) {
         this.container = container;
         this.type = type;
         this.computed = {};
         const canvasAttrs = {};
-        Object.keys(attrs).forEach(key => {
-            if (CANVAS_ATTRS.includes(key)) {
-                canvasAttrs[key] = attrs[key];
-            }
-        });
-        this.canvasAttrs = canvasAttrs;
+        if (options.attrs) {
+            Object.keys(options.attrs).forEach(key => {
+                if (CANVAS_ATTRS.includes(key)) {
+                    canvasAttrs[key] = options.attrs[key];
+                }
+            });
+        }
+        this.canvasAttrs = _.assign({}, Element.ATTRS, canvasAttrs);
+        this.zInde = options.zIndex || 0;
     }
 
     getContext() {
