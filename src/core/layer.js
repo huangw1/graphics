@@ -64,8 +64,8 @@ export default class Layer extends Element {
         const {x, y, opacity} = this.attrs;
         const ga = context.globalAlpha;
         context.save();
-        Object.keys(this.canvasAttrs).forEach(attr => {
-            context[attr] = this.canvasAttrs[attr];
+        Object.keys(this.drawAttrs).forEach(attr => {
+            context[attr] = this.drawAttrs[attr];
         });
         context.globalAlpha = clamp(opacity * ga, 0, 1);
         context.translate(x, y);

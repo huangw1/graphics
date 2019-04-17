@@ -43,15 +43,17 @@ export default class Shape extends Element {
         const ga = context.globalAlpha;
         context.save();
         context.globalAlpha = clamp(opacity * ga, 0, 1);
-        Object.keys(this.canvasAttrs).forEach(attr => {
-            context[attr] = this.canvasAttrs[attr];
+        Object.keys(this.drawAttrs).forEach(attr => {
+            context[attr] = this.drawAttrs[attr];
         });
-        this.shape.draw(context);
-        if (hasStroke) {
-            context.stroke();
-        }
-        if (hasFill) {
-            context.fill();
+        this.shape.draw(context, this.attrs);
+        if (this.type !== 'Text') {
+            if (hasStroke) {
+                context.stroke();
+            }
+            if (hasFill) {
+                context.fill();
+            }
         }
         context.restore();
     }

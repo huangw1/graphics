@@ -16,6 +16,14 @@ const line1 = canvas.addShape('line', {
     }
 });
 
+const text1 = canvas.addShape('text', {
+    attrs: {
+        x   : 300,
+        y   : 20,
+        text: 'text'
+    }
+});
+
 const circle1 = canvas.addShape('circle', {
     attrs: {
         x        : 100,
@@ -55,6 +63,10 @@ const line2 = layer1.addShape('line', {
 
 rect1.on('click', () => {
     console.log('rect1')
+});
+
+text1.on('click', () => {
+    console.log('text1')
 });
 
 circle1.on('click', () => {

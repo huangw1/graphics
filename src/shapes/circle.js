@@ -9,7 +9,7 @@ export default class Circle {
     static ATTRS = {
         x: 0,
         y: 0,
-        r: 10,
+        r: 10
     }
 
     constructor(options = {}) {
