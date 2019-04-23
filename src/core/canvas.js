@@ -3,14 +3,19 @@ import Layer from './layer';
 import EventBus from "./eventbus";
 
 export default class Canvas extends EventBus {
+    static ATTRS = {
+        width: 300,
+        height: 300
+    }
+
     constructor(ele, options = {}) {
         super();
         if (!ele) {
             ele = document.body;
         }
-        this._options = _.assign({width: 300, height: 300}, options);
+        this.attrs = _.assign({}, Canvas.ATTRS, options);
         this._getCanvas(ele);
-        this._init(this._options)
+        this._init(this.attrs)
     }
 
     _getCanvas(container) {
@@ -96,7 +101,13 @@ export default class Canvas extends EventBus {
         return this;
     }
 
+    clear() {
+        const {width, height} = this.attrs;
+        this.context.clearRect(0, 0, width, height);
+    }
+
     draw() {
+        this.clear();
         this.layers.forEach(layer => {
             layer.draw(this.context);
         })

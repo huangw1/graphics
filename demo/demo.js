@@ -42,6 +42,18 @@ const rect1 = canvas.addShape('rect', {
     }
 });
 
+rect1.animate({
+    attrs   : {
+        x: 250,
+        y: 250,
+        w: 100,
+        h: 100,
+    },
+    duration: 500,
+    delay: 500,
+    effect: 'bounceOut'
+});
+
 const layer1 = canvas.addLayer({
     attrs: {
         x      : 100,
