@@ -4,7 +4,7 @@ import EventBus from "./eventbus";
 
 export default class Canvas extends EventBus {
     static ATTRS = {
-        width: 300,
+        width : 300,
         height: 300
     }
 
@@ -47,11 +47,32 @@ export default class Canvas extends EventBus {
         this.layout = layer;
         this.layers = [layer];
 
+        this._status = {drawn: false};
         this._initEvents();
+        this._initDrawInfo();
     }
 
     _initEvents() {
         this.canvas.addEventListener('click', this._eventHandle, false);
+        this.on('canvas:update', this.update);
+    }
+
+    _initDrawInfo() {
+        this.drawInfo = {
+            drawTime: Date.now(),
+            fps     : 0
+        }
+    }
+
+    _updateDrawInfo() {
+        const {drawTime} = this.drawInfo;
+        const nowTime = Date.now();
+        const fps = 1000 / (nowTime - drawTime + 0.5);
+        console.log('fps: ', fps);
+        this.drawInfo = {
+            drawTime: nowTime,
+            fps
+        }
     }
 
     _eventHandle = (e) => {
@@ -60,7 +81,7 @@ export default class Canvas extends EventBus {
         const elements = this.elementsWithContext(eventType);
         const targetElements = elements.filter(element => element.includes(x, y));
         this.emit(eventType, targetElements, e)
-    }
+    };
 
     getPointInCanvas(clientX, clientY) {
         // ratio = style size(css) / real size(responsive)
@@ -89,6 +110,14 @@ export default class Canvas extends EventBus {
         return this.layout.addShape(type, options);
     }
 
+    getStatus() {
+        return {...this._status};
+    }
+
+    setStatus(status) {
+        Object.assign(this._status, status);
+    }
+
     getContext() {
         return this.context;
     }
@@ -106,11 +135,24 @@ export default class Canvas extends EventBus {
         this.context.clearRect(0, 0, width, height);
     }
 
+    update = () => {
+        const {drawTime} = this.drawInfo;
+        const now = Date.now();
+        if (now - drawTime > 10) {
+            this.draw();
+        }
+    };
+
     draw() {
         this.clear();
+        this._updateDrawInfo();
         this.layers.forEach(layer => {
-            layer.draw(this.context);
-        })
+            layer._draw(this.context);
+        });
+        if (!this._status.drawn) {
+            this._status.drawn = true;
+            this.emit('canvas:play');
+        }
     }
 }
 

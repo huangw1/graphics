@@ -45,7 +45,7 @@ export default class Shape extends Element {
         return this.shape.includes(x - computed.offsetX, y - computed.offsetY);
     }
 
-    draw(ctx) {
+    _draw(ctx) {
         const context = ctx || this.getContext();
         const {hasFill, hasStroke, opacity} = this.attrs;
         const ga = context.globalAlpha;

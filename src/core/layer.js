@@ -18,6 +18,13 @@ export default class Layer extends Element {
         super(container, 'Layer', options);
         this.attrs = _.assign({}, Layer.ATTRS, options.attrs);
         this.shapes = [];
+
+        this._setOffset();
+        this._initPalette();
+    }
+
+    _setOffset() {
+        const container = this.container;
         let offsetX = this.attrs.x;
         let offsetY = this.attrs.y;
         if (container instanceof Layer) {
@@ -25,6 +32,30 @@ export default class Layer extends Element {
             offsetY += container.computed.y;
         }
         this.computed = _.assign(this.computed, {offsetX, offsetY});
+    }
+
+    _initPalette() {
+        const canvas = this.getCanvas();
+        const palette = document.createElement('canvas');
+        palette.width = canvas.width;
+        palette.height = canvas.height;
+        this.palette = palette;
+        this._initBrush()
+    }
+
+    _initBrush() {
+        const {attrs, drawAttrs} = this;
+        const brush = this.palette.getContext('2d');
+        const {opacity} = attrs;
+        const parentBrush = this.getContext();
+        const parentDrawAttrs = {};
+        Element.DRAW_ATTRS.forEach(key => {
+            parentDrawAttrs[key] = parentBrush[key];
+        });
+        const brushStyle = {...parentDrawAttrs, drawAttrs};
+        brushStyle.globalAlpha = clamp(brushStyle.globalAlpha * opacity, 0, 1);
+        Object.keys(brushStyle).forEach(key => brush[key] = brushStyle[key]);
+        this.brush = brush;
     }
 
     includes(clientX, clientY) {
@@ -59,19 +90,29 @@ export default class Layer extends Element {
         return shape;
     }
 
-    draw(ctx) {
-        const context = ctx || this.getContext();
-        const {x, y, opacity} = this.attrs;
-        const ga = context.globalAlpha;
-        context.save();
-        Object.keys(this.drawAttrs).forEach(attr => {
-            context[attr] = this.drawAttrs[attr];
-        });
-        context.globalAlpha = clamp(opacity * ga, 0, 1);
-        context.translate(x, y);
-        this.shapes.forEach(shape => {
-            shape.draw(context);
-        });
-        context.restore();
+    remove(...shapes) {
+        _.remove(this.shapes, (shape) => shapes.includes(shape));
+    }
+
+    getContext() {
+        const {container} = this;
+        if (container.type === 'Layer') {
+            return container.brush;
+        }
+        return container.getContext();
+    }
+
+    _draw(ctx) {
+        const {shapes, brush, palette, attrs} = this;
+        const {x, y} = attrs;
+        const state = this.getStatus();
+        if (state.dirty) {
+            brush.clearRect(0, 0, palette.width, palette.height);
+            shapes.forEach(shape => {
+                shape._draw(brush);
+            });
+        }
+        ctx.drawImage(palette, x, y, palette.width, palette.height);
+        this.setStatus({dirty: false})
     }
 }

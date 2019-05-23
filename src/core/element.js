@@ -5,30 +5,30 @@
 import _ from 'lodash';
 import * as easing from '../utils/easing';
 
-const DRAW_ATTRS = [
-    'fillStyle',
-    'font',
-    'globalAlpha',
-    'lineCap',
-    'lineWidth',
-    'lineJoin',
-    'miterLimit',
-    'shadowBlur',
-    'shadowColor',
-    'shadowOffsetX',
-    'shadowOffsetY',
-    'strokeStyle',
-    'textAlign',
-    'textBaseline',
-    'lineDash',
-    'lineDashOffset'
-];
-
 export default class Element {
+    static DRAW_ATTRS = [
+        'fillStyle',
+        'font',
+        'globalAlpha',
+        'lineCap',
+        'lineWidth',
+        'lineJoin',
+        'miterLimit',
+        'shadowBlur',
+        'shadowColor',
+        'shadowOffsetX',
+        'shadowOffsetY',
+        'strokeStyle',
+        'textAlign',
+        'textBaseline',
+        'lineDash',
+        'lineDashOffset'
+    ];
+
     static ATTRS = {
         fillStyle  : 'black',
         strokeStyle: 'black'
-    }
+    };
 
     constructor(container, type, options) {
         this.container = container;
@@ -38,7 +38,7 @@ export default class Element {
         const drawAttrs = {};
         if (options.attrs) {
             Object.keys(options.attrs).forEach(key => {
-                if (DRAW_ATTRS.includes(key)) {
+                if (Element.DRAW_ATTRS.includes(key)) {
                     drawAttrs[key] = options.attrs[key];
                 }
             });
@@ -46,10 +46,22 @@ export default class Element {
         this.drawAttrs = _.assign({}, Element.ATTRS, drawAttrs);
         this.animateAttrs = _.assign({}, options.animate);
         this.zIndex = options.zIndex || 0;
+        this._status = {dirty: true};
+    }
+
+    getStatus() {
+        return {...this._status};
+    }
+
+    setStatus(status) {
+        Object.assign(this._status, status);
+        // if (status.dirty) {
+        //     this._noticeParent({dirty: true});
+        // }
     }
 
     animate(options) {
-        const {attrs, effect = 'linear', duration, delay} = options;
+        const {attrs, effect = 'linear', duration, delay, autoPlay = true} = options;
         const initAttrs = this.getAttrs();
         const from = {};
         const to = attrs;
@@ -59,8 +71,15 @@ export default class Element {
             diff[key] = to[key] - from[key];
         });
         this.animateAttrs = {effect, startTime: Date.now() + delay, status: 'ready', from, to, diff, duration};
-        this.timer = requestAnimationFrame(this._animate);
+        if (autoPlay) {
+            this.play();
+        }
+
     }
+
+    play = () => {
+        this.timer = requestAnimationFrame(this._animate);
+    };
 
     _animate = () => {
         const {effect, startTime, from, to, diff, duration} = this.animateAttrs;
@@ -112,6 +131,11 @@ export default class Element {
     // implement override
     includes() {
         return true;
+    }
+
+    update() {
+        const canvas = this._getCanvasInstance();
+        canvas.emit('canvas:update');
     }
 
     on(type, fun) {
