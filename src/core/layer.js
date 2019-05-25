@@ -91,7 +91,11 @@ export default class Layer extends Element {
     }
 
     remove(...shapes) {
-        _.remove(this.shapes, (shape) => shapes.includes(shape));
+        const elements = _.remove(this.shapes, (shape) => shapes.includes(shape));
+        if(elements.length) {
+            const canvas = this._getCanvasInstance();
+            canvas.emit('canvas:clear', {elements});
+        }
     }
 
     getContext() {

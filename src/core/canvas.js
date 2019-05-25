@@ -55,7 +55,12 @@ export default class Canvas extends EventBus {
     _initEvents() {
         this.canvas.addEventListener('click', this._eventHandle, false);
         this.on('canvas:update', this.update);
+        this.on('canvas:clear', this._clearEvent);
     }
+
+    _clearEvent = ({elements}) => {
+        this.clearEvent(elements)
+    };
 
     _initDrawInfo() {
         this.drawInfo = {

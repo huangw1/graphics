@@ -128,7 +128,6 @@ export default class Element {
         return this.container._getCanvasInstance();
     }
 
-    // implement override
     includes() {
         return true;
     }
@@ -141,5 +140,10 @@ export default class Element {
     on(type, fun) {
         const canvasInstance = this._getCanvasInstance();
         canvasInstance.on(type, fun, this);
+    }
+
+    off(type, fun) {
+        const canvasInstance = this._getCanvasInstance();
+        canvasInstance.off(type, fun, this);
     }
 }
