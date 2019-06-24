@@ -2,18 +2,20 @@
  * @Author: huangw1
  * @Date: 2019/4/17 20:54
  */
-import _ from 'lodash';
 import inside from './util/inside';
+import Shape from "../core/shape";
+import {assign} from "../utils/common";
 
-export default class Circle {
+export default class Circle extends Shape {
     static ATTRS = {
         x: 0,
         y: 0,
         r: 10
-    }
+    };
 
-    constructor(options = {}) {
-        this.attrs = _.assign({}, Circle.ATTRS, options);
+    constructor(type, container, options) {
+        const ops = assign({}, {attrs: Circle.ATTRS}, options);
+        super('Circle', container, ops);
     }
 
     includes(clientX, clientY) {

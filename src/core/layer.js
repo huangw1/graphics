@@ -4,8 +4,8 @@
  */
 import _ from 'lodash';
 import Element from "./element";
-import Shape from "./shape";
-import {clamp} from "../utils/common";
+import * as shapes from '../shapes';
+import {clamp, assign} from "../utils/common";
 
 export default class Layer extends Element {
     static ATTRS = {
@@ -15,8 +15,8 @@ export default class Layer extends Element {
     }
 
     constructor(container, options = {}) {
-        super(container, 'Layer', options);
-        this.attrs = _.assign({}, Layer.ATTRS, options.attrs);
+        const ops = assign({}, {attrs: Layer.ATTRS}, options);
+        super('Layer', container, ops);
         this.shapes = [];
 
         this._setOffset();
@@ -31,7 +31,7 @@ export default class Layer extends Element {
             offsetX += container.computed.x;
             offsetY += container.computed.y;
         }
-        this.computed = _.assign(this.computed, {offsetX, offsetY});
+        this.computed = assign(this.computed, {offsetX, offsetY});
     }
 
     _initPalette() {
@@ -44,17 +44,13 @@ export default class Layer extends Element {
     }
 
     _initBrush() {
-        const {attrs, drawAttrs} = this;
+        const {attrs, style} = this;
         const brush = this.palette.getContext('2d');
         const {opacity} = attrs;
-        const parentBrush = this.getContext();
-        const parentDrawAttrs = {};
-        Element.DRAW_ATTRS.forEach(key => {
-            parentDrawAttrs[key] = parentBrush[key];
+        Object.keys(style).forEach(attr => {
+            brush[attr] = style[attr];
         });
-        const brushStyle = {...parentDrawAttrs, drawAttrs};
-        brushStyle.globalAlpha = clamp(brushStyle.globalAlpha * opacity, 0, 1);
-        Object.keys(brushStyle).forEach(key => brush[key] = brushStyle[key]);
+        brush.globalAlpha = clamp(brush.globalAlpha * opacity, 0, 1);
         this.brush = brush;
     }
 
@@ -84,26 +80,22 @@ export default class Layer extends Element {
     }
 
     addShape(type, options) {
-        const shapeType = _.upperFirst(type);
-        const shape = new Shape(shapeType, options, this);
+        const typ = _.upperFirst(type);
+        const shape = new shapes[typ](typ, this, options);
         this._insertElement(shape, shape.zIndex);
         return shape;
     }
 
     remove(...shapes) {
         const elements = _.remove(this.shapes, (shape) => shapes.includes(shape));
-        if(elements.length) {
+        if (elements.length) {
             const canvas = this._getCanvasInstance();
-            canvas.emit('canvas:clear', {elements});
+            canvas.emit('@clear', elements);
         }
     }
 
     getContext() {
-        const {container} = this;
-        if (container.type === 'Layer') {
-            return container.brush;
-        }
-        return container.getContext();
+        return this.brush;
     }
 
     _draw(ctx) {

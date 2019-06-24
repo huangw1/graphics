@@ -21,3 +21,21 @@ export const clamp = (a, min, max) => {
     }
     return a;
 }
+
+export const assign = (target, ...params) => {
+    if (params.length === 0) {
+        return target;
+    }
+    params.forEach(param => {
+        if (param) {
+            Object.keys(param).forEach(key => {
+                if (param[key] && typeof param[key] === 'object' && !(param[key] instanceof HTMLElement)) {
+                    target[key] = assign({}, target[key], param[key])
+                } else {
+                    target[key] = param[key]
+                }
+            })
+        }
+    });
+    return target
+};

@@ -43,16 +43,16 @@ export default class EventBus {
             if (isElement) {
                 context = Array.isArray(context) ? context : [context];
                 this.events[type].filter(item => context.indexOf(item.context) !== -1).forEach(event => {
-                    event.fun(...data)
-                    if(event.once) {
-                        this.off(event.type, event.fun, event.context)
+                    event.fun(...data);
+                    if (event.once) {
+                        requestAnimationFrame(() => this.off(event.type, event.fun, event.context));
                     }
                 })
             } else {
                 this.events[type].forEach(event => {
-                    event.fun(context, ...data)
-                    if(event.once) {
-                        this.off(event.type, event.fun, event.context)
+                    event.fun(context, ...data);
+                    if (event.once) {
+                        requestAnimationFrame(() => this.off(event.type, event.fun, event.context))
                     }
                 })
             }
@@ -61,7 +61,7 @@ export default class EventBus {
 
     clearEvent(contexts) {
         contexts.forEach(context => {
-            for(let key in this.events) {
+            for (let key in this.events) {
                 _.remove(this.events[key], event => event.context === context);
             }
         })

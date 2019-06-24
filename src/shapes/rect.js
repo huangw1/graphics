@@ -2,10 +2,11 @@
  * @Author: huangw1
  * @Date: 2019/4/17 19:51
  */
-import _ from 'lodash';
 import inside from './util/inside';
+import Shape from "../core/shape";
+import {assign} from "../utils/common";
 
-export default class Rect {
+export default class Rect extends Shape {
     // clockwise
     static ATTRS = {
         x : 0,
@@ -13,10 +14,11 @@ export default class Rect {
         w : 10,
         h : 10,
         cw: true
-    }
+    };
 
-    constructor(options = {}) {
-        this.attrs = _.assign({}, Rect.ATTRS, options);
+    constructor(type, container, options) {
+        const ops = assign({}, {attrs: Rect.ATTRS}, options);
+        super('Rect', container, ops);
     }
 
     includes(clientX, clientY) {

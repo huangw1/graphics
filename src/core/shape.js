@@ -2,10 +2,8 @@
  * @Author: huangw1
  * @Date: 2019/4/16 14:12
  */
-import _ from 'lodash';
-import * as shapes from '../shapes';
 import Element from "./element";
-import {clamp} from "../utils/common";
+import {assign, clamp} from "../utils/common";
 
 export default class Shape extends Element {
     static ATTRS = {
@@ -14,35 +12,13 @@ export default class Shape extends Element {
         opacity  : 1
     }
 
-    constructor(type, options = {}, container) {
-        super(container, 'Shape', options);
-        this._init(type, options);
-    }
-
-    _init(type, options) {
-        const {attrs, ...otherControl} = options;
+    constructor(type, container, options = {}) {
+        const ops = assign({}, {attrs: Shape.ATTRS}, options);
         if (type === 'Line') {
-            _.assign(otherControl, {hasFill: false, hasStroke: true});
+            ops.attrs.hasFill = false;
+            ops.attrs.hasStroke = true;
         }
-        this.type = type;
-        this.attrs = _.assign({}, Shape.ATTRS, otherControl);
-        if (!shapes[type]) {
-            throw `unknown shape ${type}!`
-        }
-        this.shape = new shapes[type](attrs);
-    }
-
-    getAttrs() {
-        return this.shape.attrs;
-    }
-
-    setAttrs(attrs) {
-        _.assign(this.shape.attrs, attrs);
-    }
-
-    includes(x, y) {
-        const {computed} = this.container;
-        return this.shape.includes(x - computed.offsetX, y - computed.offsetY);
+        super(type, container, ops);
     }
 
     _draw(ctx) {
@@ -51,10 +27,10 @@ export default class Shape extends Element {
         const ga = context.globalAlpha;
         context.save();
         context.globalAlpha = clamp(opacity * ga, 0, 1);
-        Object.keys(this.drawAttrs).forEach(attr => {
-            context[attr] = this.drawAttrs[attr];
+        Object.keys(this.style).forEach(attr => {
+            context[attr] = this.style[attr];
         });
-        this.shape.draw(context, this.attrs);
+        this.draw(context, this.attrs);
         if (this.type !== 'Text') {
             if (hasStroke) {
                 context.stroke();

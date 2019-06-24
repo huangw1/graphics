@@ -2,30 +2,32 @@
  * @Author: huangw1
  * @Date: 2019/4/18 02:30
  */
-import _ from 'lodash';
 import inside from './util/inside';
+import Shape from "../core/shape";
+import {assign} from "../utils/common";
 
-export default class Text {
+export default class Text extends Shape {
     static ATTRS = {
         x   : 0,
         y   : 0,
         text: ''
-    }
+    };
 
-    constructor(options = {}) {
-        this.computed = {};
-        this.attrs = _.assign({}, Text.ATTRS, options);
+    constructor(type, container, options) {
+        const ops = assign({}, {attrs: Text.ATTRS}, options);
+        super('Text', container, ops);
     }
 
     includes(clientX, clientY) {
-        let {x, y, text, font, textBaseline} = this.attrs;
+        let {x, y, text} = this.attrs;
+        let {font, textBaseline} = this.style;
         let {w, h} = this.computed;
         if (!w || !h) {
             const ctx = document.createElement('canvas').getContext('2d');
             ctx.font = font;
             w = ctx.measureText(text).width;
             h = this._getCtxFontSize(ctx);
-            _.assign(this.computed, {w, h})
+            assign(this.computed, {w, h})
         }
         switch (textBaseline) {
             case 'middle':
@@ -55,15 +57,6 @@ export default class Text {
 
     draw(ctx, otherControl) {
         const {x, y, text} = this.attrs;
-        if (this._getCtxFontSize(ctx) < 12) {
-            ctx.font = ctx.font.replace(/(^|\s)(\d+)px(\s|$)/i, ' 12px ');
-        }
-        if (ctx.font !== this.attrs.font) {
-            this.attrs.font = ctx.font;
-        }
-        if (ctx.textBaseline !== this.attrs.textBaseline) {
-            this.attrs.textBaseline = ctx.textBaseline;
-        }
         const {hasFill, hasStroke} = otherControl;
         if (hasFill) {
             ctx.fillText(text, x, y);

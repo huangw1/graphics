@@ -1,19 +1,20 @@
 import _ from 'lodash';
 import Layer from './layer';
 import EventBus from "./eventbus";
+import {assign} from "../utils/common";
 
 export default class Canvas extends EventBus {
     static ATTRS = {
         width : 300,
         height: 300
-    }
+    };
 
     constructor(ele, options = {}) {
         super();
         if (!ele) {
             ele = document.body;
         }
-        this.attrs = _.assign({}, Canvas.ATTRS, options);
+        this.attrs = assign({}, Canvas.ATTRS, options);
         this._getCanvas(ele);
         this._init(this.attrs)
     }
@@ -43,38 +44,60 @@ export default class Canvas extends EventBus {
         this.canvas.height = height;
         this.context = this.canvas.getContext('2d');
 
-        const layer = new Layer(this);
-        this.layout = layer;
-        this.layers = [layer];
-
-        this._status = {drawn: false};
+        this.layers = [];
+        this.computed = {shapeLength: 0, layerLength: 0, animate: 0};
+        this._status = {drawn: false, dirty: false};
         this._initEvents();
+        this._initBackground();
         this._initDrawInfo();
     }
 
-    _initEvents() {
-        this.canvas.addEventListener('click', this._eventHandle, false);
-        this.on('canvas:update', this.update);
-        this.on('canvas:clear', this._clearEvent);
+    _initBackground() {
+        const background = new Layer(this, {zIndex: -1});
+        this._background = background;
+        this.layers.unshift(background);
+        this.emit('@change', 'layer', 1);
     }
 
-    _clearEvent = ({elements}) => {
+    _initEvents() {
+        this.on('@clear', this._clearEvent);
+        this.on('@change', this._contentChange);
+        this.canvas.addEventListener('click', this._eventHandle, false);
+        this.canvas.addEventListener('dblclick', this._eventHandle, false);
+        this.canvas.addEventListener('mouseup', this._eventHandle, false);
+        this.canvas.addEventListener('mousedown', this._eventHandle, false);
+        this.canvas.addEventListener('mousemove', this._eventHandle, false);
+    }
+
+    _setComputed(computed) {
+        assign(this.computed, computed);
+    }
+
+    _contentChange = (type, count) => {
+        const {shapeLength, layerLength} = this.computed;
+        if (type === 'layer') {
+            this._setComputed({layerLength: layerLength + count});
+        } else {
+            this._setComputed({shapeLength: shapeLength + count});
+        }
+    };
+
+    _clearEvent = (elements) => {
         this.clearEvent(elements)
     };
 
     _initDrawInfo() {
-        this.drawInfo = {
+        this._drawInfo = {
             drawTime: Date.now(),
             fps     : 0
         }
     }
 
     _updateDrawInfo() {
-        const {drawTime} = this.drawInfo;
+        const {drawTime} = this._drawInfo;
         const nowTime = Date.now();
         const fps = 1000 / (nowTime - drawTime + 0.5);
-        console.log('fps: ', fps);
-        this.drawInfo = {
+        this._drawInfo = {
             drawTime: nowTime,
             fps
         }
@@ -84,7 +107,10 @@ export default class Canvas extends EventBus {
         const eventType = e.type;
         const {x, y} = this.getPointInCanvas(e.clientX, e.clientY);
         const elements = this.elementsWithContext(eventType);
-        const targetElements = elements.filter(element => element.includes(x, y));
+        const targetElements = elements.filter(element => {
+            const {offsetX, offsetY} = element.container.computed;
+            return element.includes(x - offsetX, y - offsetY)
+        });
         this.emit(eventType, targetElements, e)
     };
 
@@ -108,11 +134,13 @@ export default class Canvas extends EventBus {
         } else {
             this.layers.splice(index + 1, 0, layer);
         }
+        this.emit('@change', 'layer', 1);
         return layer;
     }
 
     addShape(type, options) {
-        return this.layout.addShape(type, options);
+        this.emit('@change', 'shape', 1);
+        return this._background.addShape(type, options);
     }
 
     getStatus() {
@@ -120,7 +148,7 @@ export default class Canvas extends EventBus {
     }
 
     setStatus(status) {
-        Object.assign(this._status, status);
+        assign(this._status, status);
     }
 
     getContext() {
@@ -135,29 +163,41 @@ export default class Canvas extends EventBus {
         return this;
     }
 
+    update() {
+        const {drawn} = this.getStatus();
+        if (drawn) {
+            this.draw();
+        }
+    }
+
     clear() {
         const {width, height} = this.attrs;
         this.context.clearRect(0, 0, width, height);
     }
 
-    update = () => {
-        const {drawTime} = this.drawInfo;
-        const now = Date.now();
-        if (now - drawTime > 10) {
-            this.draw();
+    _draw = () => {
+        this.clear();
+        this._updateDrawInfo();
+        const status = this.getStatus();
+        this.layers.forEach(layer => {
+            layer._draw(this.context);
+        });
+        if (!status.drawn) {
+            this.setStatus({drawn: true});
+            this.emit('@play');
+        }
+        if (this.computed.animate) {
+            this.timer = requestAnimationFrame(this._draw);
+        } else {
+            this.timer = null;
         }
     };
 
     draw() {
-        this.clear();
-        this._updateDrawInfo();
-        this.layers.forEach(layer => {
-            layer._draw(this.context);
-        });
-        if (!this._status.drawn) {
-            this._status.drawn = true;
-            this.emit('canvas:play');
+        if (this.timer) {
+            cancelAnimationFrame(this.timer);
         }
+        this.timer = requestAnimationFrame(this._draw);
     }
 }
 
