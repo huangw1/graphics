@@ -104,7 +104,7 @@ const rect1 = canvas.addShape('rect', {
         },
         duration: 500,
         delay: 500,
-        effect: 'bounceOut',
+        effect: 'bounceOut'
     }
 });
 

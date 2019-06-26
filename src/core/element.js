@@ -64,7 +64,15 @@ export default class Element {
     }
 
     animate(options) {
-        const {attrs = {}, style = {}, effect = 'linear', duration, delay = 0, autoPlay = true, repeat = false} = options;
+        const {attrs = {},
+            style = {},
+            effect = 'linear',
+            duration,
+            delay = 0,
+            autoPlay = true,
+            repeat = false,
+            loop = false
+        } = options;
         const to = {attrs, style};
         const from = {attrs: {}, style: {}};
         const diff = {attrs: {}, style: {}};
@@ -92,7 +100,8 @@ export default class Element {
             diff,
             duration,
             repeat,
-            delay
+            delay,
+            loop
         };
         if (autoPlay) {
             this.play();
@@ -129,7 +138,7 @@ export default class Element {
     };
 
     _animate = () => {
-        const {effect, startTime, from, to, diff, duration, repeat} = this.animateAttrs;
+        const {effect, startTime, from, to, diff, duration, repeat, loop} = this.animateAttrs;
         const passTime = Date.now() - startTime;
         if (passTime > 0) {
             if (passTime < duration) {
@@ -145,6 +154,11 @@ export default class Element {
                 this.setStatus({dirty: true});
                 assign(this.animateAttrs, {status: 'playing', lastTime: Date.now()});
                 this.timer = requestAnimationFrame(this._animate);
+            } else if (loop) {
+                this.setAttrs(to.attrs);
+                this.setStyle(to.style);
+                this.setStatus({dirty: true});
+                this.animate({duration, effect, loop, ...from})
             } else if (repeat) {
                 this.setAttrs(from.attrs);
                 this.setStyle(from.style);
